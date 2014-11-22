@@ -1,0 +1,27 @@
+{
+    "name": "derelict-sass",
+    "targetName": "DerelictSASS",
+    "version": "0.1.0",
+    "description": "Dynamic bindings to libsass.",
+
+    "authors": [
+        "Vlad Rindevich"
+    ],
+
+    "dependencies": {
+        "derelict-util": ">=1.0.3"
+    },
+
+    "importPaths": ["source/"],
+    "sourcePaths": ["source/"],
+
+    "license": "Boost",
+
+    "configurations": [
+        {
+            "targetType": "library",
+            "name": "library"
+        }
+    ],
+    "targetPath": "lib",
+}
