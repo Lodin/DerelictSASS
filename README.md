@@ -7,12 +7,15 @@ For information on how to build DerelictSASS and link it with your programs, ple
 ### Building libsass
 Clone libsass from it [repository](https://github.com/sass/libsass):
 ```bash
-git clone git://github.com/sass/libsass.git
+$ git clone git://github.com/sass/libsass.git
 ```
-And then make it as shared library. Installation is optional.
+Then make it as shared library.
 ```bash
-make BUILD=shared
-make install BUILD=shared
+$ make BUILD=shared
+```
+In the end you can install library:
+```bash
+$ make install BUILD=shared
 ```
 
 ### Using DerelictSASS
