@@ -28,12 +28,6 @@ DEALINGS IN THE SOFTWARE.
 
 module derelict.sass.sass;
 
-public {
-    import derelict.sass.functions;
-    import derelict.sass.options;
-    import derelict.sass.types;
-}
-
 private {
     import derelict.util.loader;
     import derelict.util.exception;
@@ -48,11 +42,189 @@ private {
     }
 }
 
+enum {
+    SASS_STYLE_NESTED = 0,
+    SASS_STYLE_EXPANDED = 1,
+    SASS_STYLE_COMPACT = 2,
+    SASS_STYLE_COMPRESSED = 3,
+
+    SASS2SCSS_PRETTIFY_0 = 0,
+    SASS2SCSS_PRETTIFY_1 = 1,
+    SASS2SCSS_PRETTIFY_2 = 2,
+    SASS2SCSS_PRETTIFY_3 = 3,
+    
+    SASS2SCSS_KEEP_COMMENT = 32,
+    SASS2SCSS_STRIP_COMMENT = 64,
+    SASS2SCSS_CONVERT_COMMENT = 128,
+}
+
+enum Sass_Tag {
+    SASS_BOOLEAN,
+    SASS_NUMBER,
+    SASS_COLOR,
+    SASS_STRING,
+    SASS_LIST,
+    SASS_MAP,
+    SASS_NULL,
+    SASS_ERROR
+}
+
+enum Sass_Separator {
+    SASS_COMMA,
+    SASS_SPACE
+}
+
+struct sass_options {
+    int output_style;
+    bool source_comments;
+    const(char)* source_map_file;
+    bool omit_source_map_url;
+    bool source_map_embed;
+    bool source_map_contents;
+    bool is_indented_syntax_src;
+    const(char)* include_paths;
+    const(char)* image_path;
+    int precision;
+}
+
+struct sass_context {
+    const(char)* input_path;
+    const(char)* output_path;
+    const(char)* source_string;
+    char* output_string;
+    char* source_map_string;
+    sass_options options;
+    int error_status;
+    char* error_message;
+    Sass_C_Function_List c_functions;
+    char** included_files;
+    int num_included_files;
+}
+
+struct sass_file_context {
+    const(char)* input_path;
+    const(char)* output_path;
+    char* output_string;
+    char* source_map_string;
+    sass_options options;
+    int error_status;
+    char* error_message;
+    Sass_C_Function_List c_functions;
+    char** included_files;
+    int num_included_files;
+}
+
+struct sass_folder_context {
+    const(char)* search_path;
+    const(char)* output_path;
+    sass_options options;
+    int error_status;
+    char* error_message;
+    Sass_C_Function_List c_functions;
+    char** included_files;
+    int num_included_files;
+}
+
+struct Sass_C_Function_Descriptor {
+    const char*     signature;
+    Sass_C_Function function_;
+    void*           cookie;
+}
+
+union Sass_Value {
+    Sass_Unknown unknown;
+    Sass_Boolean boolean;
+    Sass_Number number;
+    Sass_Color color;
+    Sass_String string;
+    Sass_List list;
+    Sass_Map map;
+    Sass_Null null_;
+    Sass_Error error;
+}
+
+struct Sass_Unknown {
+    Sass_Tag tag;
+}
+
+struct Sass_Boolean {
+    Sass_Tag tag;
+    bool value;
+}
+
+struct Sass_Number {
+    Sass_Tag tag;
+    double value;
+    char* unit;
+}
+
+struct Sass_Color {
+    Sass_Tag tag;
+    double r;
+    double g;
+    double b;
+    double a;
+}
+
+struct Sass_String {
+    Sass_Tag tag;
+    char* value;
+}
+
+struct Sass_List {
+    Sass_Tag tag;
+    Sass_Separator separator;
+    size_t length;
+    Sass_Value** values;
+}
+
+struct Sass_Map {
+    Sass_Tag tag;
+    size_t length;
+    Sass_MapPair* pairs;
+}
+
+struct Sass_Null {
+    Sass_Tag tag;
+}
+
+struct Sass_Error {
+    Sass_Tag tag;
+    char* message;
+}
+
+struct Sass_MapPair {
+    Sass_Value* key;
+    Sass_Value* value;
+}
+
+extern( C ) @nogc nothrow {
+    alias Sass_C_Function_List = Sass_C_Function_Descriptor* function ();
+    alias Sass_C_Function = Sass_Value* function (Sass_Value*, void* cookie);
+
+    alias da_sass_new_context = sass_context* function();
+    alias da_sass_new_file_context = sass_file_context* function();
+    alias da_sass_new_folder_context = sass_folder_context* function();
+    
+    alias da_sass_free_context = void function( sass_context* ctx );
+    alias da_sass_free_file_context = void function( sass_file_context* ctx );
+    alias da_sass_free_folder_context = void function( sass_folder_context* ctx );
+    
+    alias da_sass_compile = int function( sass_context* ctx );
+    alias da_sass_compile_file = int function( sass_file_context* ctx );
+    alias da_sass_compile_folder = int function( sass_folder_context* ctx );
+    
+    alias da_sass2scss = char* function( const(char)* sass, const(int) options );
+    
+    alias da_sass_string_quote =  char* function( const(char)* str, const(char) quotemark );
+    alias da_sass_string_unquote = char* function( const(char)* str );
+}
+
 class DerelictSassLoader : SharedLibLoader {
     public this() {
         super( libNames );
     }
-
+    
     protected override void loadSymbols() {
         bindFunc( cast( void** )&sass_new_context, "sass_new_context" );
         bindFunc( cast( void** )&sass_new_file_context, "sass_new_file_context" );
@@ -69,7 +241,25 @@ class DerelictSassLoader : SharedLibLoader {
     }
 }
 
-__gshared DerelictSassLoader DerelictSass;
+__gshared {
+    da_sass_new_context sass_new_context;
+    da_sass_new_file_context sass_new_file_context;
+    da_sass_new_folder_context sass_new_folder_context;
+    
+    da_sass_free_context sass_free_context;
+    da_sass_free_file_context sass_free_file_context;
+    da_sass_free_folder_context sass_free_folder_context;
+    
+    da_sass_compile sass_compile;
+    da_sass_compile_file sass_compile_file;
+    da_sass_compile_folder sass_compile_folder;
+    
+    da_sass2scss sass2scss;
+    da_sass_string_quote sass_string_quote;
+    da_sass_string_unquote sass_string_unquote;
+
+    DerelictSassLoader DerelictSass;
+}
 
 shared static this() {
     DerelictSass = new DerelictSassLoader;
