@@ -42,6 +42,9 @@ private {
     }
 }
 
+alias Sass_Tag = int;
+alias Sass_Separator = int;
+
 enum {
     SASS_STYLE_NESTED = 0,
     SASS_STYLE_EXPANDED = 1,
@@ -58,7 +61,7 @@ enum {
     SASS2SCSS_CONVERT_COMMENT = 128,
 }
 
-enum Sass_Tag {
+enum : Sass_Tag {
     SASS_BOOLEAN,
     SASS_NUMBER,
     SASS_COLOR,
@@ -69,7 +72,7 @@ enum Sass_Tag {
     SASS_ERROR
 }
 
-enum Sass_Separator {
+enum : Sass_Separator {
     SASS_COMMA,
     SASS_SPACE
 }
