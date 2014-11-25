@@ -42,9 +42,6 @@ private {
     }
 }
 
-alias Sass_Tag = int;
-alias Sass_Separator = int;
-
 enum {
     SASS_STYLE_NESTED = 0,
     SASS_STYLE_EXPANDED = 1,
@@ -61,6 +58,7 @@ enum {
     SASS2SCSS_CONVERT_COMMENT = 128,
 }
 
+alias Sass_Tag = int;
 enum : Sass_Tag {
     SASS_BOOLEAN,
     SASS_NUMBER,
@@ -72,6 +70,7 @@ enum : Sass_Tag {
     SASS_ERROR
 }
 
+alias Sass_Separator = int;
 enum : Sass_Separator {
     SASS_COMMA,
     SASS_SPACE
@@ -129,9 +128,9 @@ struct sass_folder_context {
 }
 
 struct Sass_C_Function_Descriptor {
-    const char*     signature;
+    const(char)* signature;
     Sass_C_Function function_;
-    void*           cookie;
+    void* cookie;
 }
 
 union Sass_Value {
@@ -204,7 +203,9 @@ struct Sass_MapPair {
 extern( C ) @nogc nothrow {
     alias Sass_C_Function_List = Sass_C_Function_Descriptor* function ();
     alias Sass_C_Function = Sass_Value* function (Sass_Value*, void* cookie);
+}
 
+extern( C ) @nogc nothrow {
     alias da_sass_new_context = sass_context* function();
     alias da_sass_new_file_context = sass_file_context* function();
     alias da_sass_new_folder_context = sass_folder_context* function();
@@ -221,6 +222,24 @@ extern( C ) @nogc nothrow {
     
     alias da_sass_string_quote =  char* function( const(char)* str, const(char) quotemark );
     alias da_sass_string_unquote = char* function( const(char)* str );
+}
+
+__gshared {
+    da_sass_new_context sass_new_context;
+    da_sass_new_file_context sass_new_file_context;
+    da_sass_new_folder_context sass_new_folder_context;
+    
+    da_sass_free_context sass_free_context;
+    da_sass_free_file_context sass_free_file_context;
+    da_sass_free_folder_context sass_free_folder_context;
+    
+    da_sass_compile sass_compile;
+    da_sass_compile_file sass_compile_file;
+    da_sass_compile_folder sass_compile_folder;
+    
+    da_sass2scss sass2scss;
+    da_sass_string_quote sass_string_quote;
+    da_sass_string_unquote sass_string_unquote;
 }
 
 class DerelictSassLoader : SharedLibLoader {
@@ -244,25 +263,7 @@ class DerelictSassLoader : SharedLibLoader {
     }
 }
 
-__gshared {
-    da_sass_new_context sass_new_context;
-    da_sass_new_file_context sass_new_file_context;
-    da_sass_new_folder_context sass_new_folder_context;
-    
-    da_sass_free_context sass_free_context;
-    da_sass_free_file_context sass_free_file_context;
-    da_sass_free_folder_context sass_free_folder_context;
-    
-    da_sass_compile sass_compile;
-    da_sass_compile_file sass_compile_file;
-    da_sass_compile_folder sass_compile_folder;
-    
-    da_sass2scss sass2scss;
-    da_sass_string_quote sass_string_quote;
-    da_sass_string_unquote sass_string_unquote;
-
-    DerelictSassLoader DerelictSass;
-}
+__gshared DerelictSassLoader DerelictSass;
 
 shared static this() {
     DerelictSass = new DerelictSassLoader;
