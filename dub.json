@@ -1,7 +1,6 @@
 {
     "name": "derelict-sass",
     "targetName": "DerelictSASS",
-    "version": "1.0.0",
     "description": "Dynamic bindings to libsass.",
 
     "authors": [ "Vlad Rindevich" ],
